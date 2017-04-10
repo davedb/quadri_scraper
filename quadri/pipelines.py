@@ -210,7 +210,7 @@ class MongoPipeline(object):
             #         }
             #     }
             # )
-            pass
+            cursor.close()
 
-        cursor.close()
+
         return item
