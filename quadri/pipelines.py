@@ -146,8 +146,6 @@ class CheckItemValuesPipeline(object):
 
 class MongoPipeline(object):
 
-    collection_name = 'quadrilocale_area_maggiolina_2017'
-
     def __init__(self, mongo_uri, mongo_db, mongo_secret):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
@@ -166,7 +164,12 @@ class MongoPipeline(object):
         )
 
     def open_spider(self, spider):
-        #self.client = pymongo.MongoClient(self.mongo_uri)
+        try:
+            collection_name = spider.collection_name_to_save_data
+        except AttributeError as e:
+            raise Exception('!!!Attention!!! collection_name_to_save_data to be defined in spider')
+
+
         self.client = pymongo.MongoClient(self.mongo_uri, 27017)
         try:
             self.db = self.client[self.mongo_db]
@@ -181,12 +184,12 @@ class MongoPipeline(object):
 
     def process_item(self, item, spider):
 
-        cursor = self.db[self.collection_name].find({'id_el':dict(item)['id_el']})
+        cursor = self.db[collection_name].find({'id_el':dict(item)['id_el']})
 
         if cursor.count() == 0:
             #print(dict(item)['name'])
             #print('New Doc! : {0}'.format(dict(item)['name']))
-            self.db[self.collection_name].insert(dict(item))
+            self.db[collection_name].insert(dict(item))
         else:
             # the element is duplicated if any difference is found write it in updates
             # updates: {
@@ -196,7 +199,7 @@ class MongoPipeline(object):
 
             # for doc in cursor:
             #
-            # self.db[self.collection_name].update_one(
+            # self.db[collection_name].update_one(
             #     {'name': dict(item)['name']},
             #     { '$set':{
             #         'udpates':{

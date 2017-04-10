@@ -10,6 +10,14 @@ class ImmobiliareOtherInfoSpider(scrapy.Spider):
     allowed_domains = ["immobiliare.it"]
     start_urls = ['http://www.immobiliare.it/Milano/vendita_case-Milano.html?criterio=rilevanza']
 
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'quadri.pipelines.CheckElementIsDuplicate': 200,
+            'quadri.pipelines.CheckItemValuesPipeline': 300
+        }
+    }
+
+
     def closed(self, reason):
         print(len(self.item_seen))
         print(self.item_seen)
