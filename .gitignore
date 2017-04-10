@@ -1,5 +1,6 @@
 #custom
-./grant/mongo_secret.txt
+mongo_secret.txt*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
