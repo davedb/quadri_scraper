@@ -9,6 +9,8 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+#LOG_LEVEL = 'INFO'
+
 BOT_NAME = 'quadri'
 
 SPIDER_MODULES = ['quadri.spiders']
@@ -16,7 +18,8 @@ NEWSPIDER_MODULE = 'quadri.spiders'
 
 MONGO_URI = 'localhost'
 MONGO_DATABASE = 'quadri'
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
+MONGO_SECRET = './grant/mongo_secret.txt'
+# Crawl responsibly by identifying yourself (and your website)eision on the user-agent
 #USER_AGENT = 'quadri (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
@@ -66,8 +69,10 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   #'quadri.pipelines.GetAllOtherInfoElements': 200,
    'quadri.pipelines.CheckElementIsDuplicate': 200,
    'quadri.pipelines.CheckItemValuesPipeline': 300,
+   'quadri.pipelines.MongoPipeline': 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

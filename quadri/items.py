@@ -19,6 +19,8 @@ class QuadriItem(scrapy.Item):
     bathrooms = scrapy.Field()
     surface = scrapy.Field()
     desc = scrapy.Field()
+    date_published = scrapy.Field()
     date_scraped = scrapy.Field()
     other_info = scrapy.Field()
+    agency = scrapy.Field()
     pass
