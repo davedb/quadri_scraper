@@ -185,7 +185,7 @@ class MongoPipeline(object):
 
         if cursor.count() == 0:
             #print(dict(item)['name'])
-            print('New Doc! : {0}'.format(dict(item)['name']))
+            #print('New Doc! : {0}'.format(dict(item)['name']))
             self.db[self.collection_name].insert(dict(item))
         else:
             # the element is duplicated if any difference is found write it in updates
