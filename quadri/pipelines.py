@@ -169,8 +169,8 @@ class MongoPipeline(object):
         #self.client = pymongo.MongoClient(self.mongo_uri)
         self.client = pymongo.MongoClient(self.mongo_uri, 27017)
         try:
-            self.client['admin'].authenticate(self.mongo_u, self.mongo_p, mechanism='SCRAM-SHA-1')
             self.db = self.client[self.mongo_db]
+            self.db.authenticate(self.mongo_u, self.mongo_p, mechanism='SCRAM-SHA-1')
         except Exception as e:
             print('mongo db auth error %s' % e)
             #return self
