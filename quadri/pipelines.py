@@ -145,7 +145,7 @@ class CheckItemValuesPipeline(object):
                 # from str to datetime datetime, 23/03/2017
                 for el in rif_and_data:
                     if collections.Counter(el)['/'] == 2:
-                        item['date_published'] = self.string_2_datetime(rif_and_data[1])
+                        item['date_published'] = self.string_2_datetime(el)
 
                 try:
                     item_other_info.pop(self.other_infos_label['rif_and_date_label'])
