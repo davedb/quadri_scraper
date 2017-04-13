@@ -23,4 +23,4 @@ class QuadriItem(scrapy.Item):
     date_scraped = scrapy.Field()
     other_info = scrapy.Field()
     agency = scrapy.Field()
-    pass
+    rif = scrapy.Field()

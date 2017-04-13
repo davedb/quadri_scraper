@@ -1,30 +1,36 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import logging
+from quadri.items import QuadriItem
+import datetime as datetime
 
 
-class ImmobiliareOtherInfoSpider(scrapy.Spider):
+class ImmobiliareTestContentSpider(scrapy.Spider):
     item_seen = set()
+    description_pages_scraped = 0
 
-    name = "immobiliare_other_info"
+    name = "immobiliare_test_content"
     allowed_domains = ["immobiliare.it"]
     start_urls = ['http://www.immobiliare.it/Milano/vendita_case-Milano.html?criterio=rilevanza']
 
+
+    # custom settings
+    ELEMENT_TO_CHECK = 'Spese condominio'
+
     custom_settings = {
         'ITEM_PIPELINES': {
-            'quadri.pipelines.CheckElementIsDuplicate': 200,
-            'quadri.pipelines.CheckItemValuesPipeline': 300
+            # 'quadri.pipelines.CheckElementIsDuplicate': 200,
+            # 'quadri.pipelines.CheckItemValuesPipeline': 300
         }
     }
 
-
     def closed(self, reason):
-        print(len(self.item_seen))
         print(self.item_seen)
+        print('Pagine analizzate: {0}'.format(self.description_pages_scraped))
+        print('Numero di contenuti diversi trovati alla voce Superficie: {0}'.format(len(self.item_seen)))
 
 
     def parse(self, response):
-
         listing = response.css('#listing-container > li')
 
         if len(listing) > 0:
@@ -38,9 +44,16 @@ class ImmobiliareOtherInfoSpider(scrapy.Spider):
                         print(e)
         else:
             section_data = response.css('.section-data')
+            self.description_pages_scraped = self.description_pages_scraped + 1
+            # surface
+            for label, data in zip(section_data.css('dl > dt'), section_data.css('dl > dd')):
+                if label.css('dt::text').extract_first() == self.ELEMENT_TO_CHECK:
+                    if data.css('dd::text').extract_first():
+                        self.item_seen.add(data.css('dd::text').extract_first())
+                    else:
+                        self.item_seen.add(data.css('dd>span::text').extract_first())
 
-            for label in section_data.css('dl > dt'):
-                self.item_seen.add(label.css('dt::text').extract_first())
+
 
         next_page = response.css('#listing-pagination > .pull-right > li > a::attr(href)').extract_first()
         if next_page is not None:
