@@ -18,7 +18,10 @@ class ImmobiliareGenericSpider(scrapy.Spider):
 
 
     def start_requests(self):
-        yield scrapy.Request('http://www.immobiliare.it/%s' % self.url)
+        try:
+            yield scrapy.Request('http://www.immobiliare.it/%s' % self.url)
+        except AttributeError as e:
+            yield scrapy.Request('http://www.immobiliare.it/%s' % 'ricerca.php?idCategoria=1&idContratto=1&idTipologia=&sottotipologia=&idTipologiaStanza=&idFasciaPrezzo=&idNazione=IT&idRegione=&idProvincia=&idComune=&idLocalita=Array&idAreaGeografica=&prezzoMinimo=&prezzoMassimo=500000&balcone=&balconeOterrazzo=&boxOpostoauto=&stato=&terrazzo=&bagni=&mappa=&foto=&boxAuto=&riscaldamenti=&giardino=&superficie=&superficieMinima=120&superficieMassima=&raggio=&locali=&localiMinimo=&localiMassimo=&criterio=rilevanza&ordine=desc&map=0&tipoProprieta=&arredato=&inAsta=&noAste=&aReddito=&fumatore=&animali=&franchising=&flagNc=&gayfriendly=&internet=&sessoInquilini=&vacanze=&categoriaStanza=&fkTipologiaStanza=&ascensore=&classeEnergetica=&verticaleAste=&pag=1&vrt=45.492673,9.192534000000023;45.49560149695259,9.194957224884092;45.502664773793555,9.200580653488146;45.5018470769309,9.205817843994055;45.49425556202058,9.200370632293698;45.49213975206201,9.204035969619781;45.489803210389525,9.201169408088731;45.491137,9.198732000000064;45.487936009917284,9.195826910034157;45.489379578701346,9.191148166656376;45.492673,9.192534000000023')
 
     def parse_details_page(self, response):
         """Parse a details page

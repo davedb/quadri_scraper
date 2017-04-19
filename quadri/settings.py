@@ -9,7 +9,8 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-LOG_LEVEL = 'INFO'
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'#'WARNING'#INFO#DEBUG
 
 BOT_NAME = 'quadri'
 

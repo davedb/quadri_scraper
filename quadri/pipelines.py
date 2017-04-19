@@ -9,7 +9,10 @@ import re
 
 import pymongo
 
-import datetime
+import datetime as datetime
+
+import logging
+
 
 # needed to check frequency of letters in word.
 # in particular it is used for checking date_published,
@@ -203,6 +206,8 @@ class MongoPipeline(object):
         f.close()
 
         self.collection_name = ''
+        self.items_already_on_db = set()
+        self.current_date = (datetime.datetime.today()).replace(hour=0, minute=0, second=0, microsecond=0)
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -229,6 +234,33 @@ class MongoPipeline(object):
         #self.db = self.client[self.mongo_db]
 
     def close_spider(self, spider):
+        item_to_update_date_deleted = set()
+        # self.items_already_on_db
+        # controllo quali che siano gli elementi incontrati online e già salvati a db.
+        # recupera da db tutti quei documenti che non fanno parte di quelli incontrati online
+        # e che non hanno l'elemento date_deleted
+        # a cui ora verrà assegnata la proprietà date_deleted con la data di oggi
+        cursor = self.db[self.collection_name].find({'date_deleted':{'$exists': False}})
+
+        # print(self.items_already_on_db)
+        # print(self.collection_name)
+
+        for el in cursor:
+            if el['id_el'] not in self.items_already_on_db:
+                item_to_update_date_deleted.add(el['id_el'])
+
+        cursor.close()
+
+        # print(item_to_update_date_deleted)
+
+        for el_to_update in item_to_update_date_deleted:
+            logging.warning('Element not in list anymore: {0}'.format(el_to_update))
+            self.db[self.collection_name].update_one(
+                {'id_el': el_to_update},
+                { '$set':{
+                    'date_deleted': self.current_date
+                }}
+            )
         self.client.close()
 
     def process_item(self, item, spider):
@@ -240,6 +272,8 @@ class MongoPipeline(object):
             #print('New Doc! : {0}'.format(dict(item)['name']))
             self.db[self.collection_name].insert(dict(item))
         else:
+            #logging.info('Elemento gia presente a db: {0}'.format(dict(item)['id_el'], '>20'))
+            self.items_already_on_db.add(dict(item)['id_el'])
             # the element is duplicated if any difference is found write it in updates
             # updates: {
             # 	'key': [['datetime', 'value'], ['datetime', 'value']],
