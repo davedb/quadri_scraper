@@ -271,6 +271,8 @@ class MongoPipeline(object):
             #print(dict(item)['name'])
             #print('New Doc! : {0}'.format(dict(item)['name']))
             self.db[self.collection_name].insert(dict(item))
+            # now the item is on db, so it adds the item to the set
+            self.items_already_on_db.add(dict(item)['id_el'])
         else:
             #logging.info('Elemento gia presente a db: {0}'.format(dict(item)['id_el'], '>20'))
             self.items_already_on_db.add(dict(item)['id_el'])
