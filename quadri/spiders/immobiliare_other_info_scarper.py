@@ -4,11 +4,20 @@ import logging
 
 
 class ImmobiliareOtherInfoSpider(scrapy.Spider):
+    """
+    Classe Helper.
+    La classe permette di recuperare tutti gli atrtibuti di una pagina dettaglio
+    Vengono stampati all'evento spider close. Tutti gli elementi sono salvati nel set
+    item_seen.
+
+    Viene sovrascritta la pipelines cosi da non salvare i dati su mongodb
+    """
     item_seen = set()
 
     name = "immobiliare_other_info"
     allowed_domains = ["immobiliare.it"]
     start_urls = ['http://www.immobiliare.it/Milano/vendita_case-Milano.html?criterio=rilevanza']
+
 
     custom_settings = {
         'ITEM_PIPELINES': {

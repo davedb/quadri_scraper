@@ -24,3 +24,22 @@ class QuadriItem(scrapy.Item):
     other_info = scrapy.Field()
     agency = scrapy.Field()
     rif = scrapy.Field()
+
+class SubitoSingleItemList(scrapy.Item):
+    # define the fields for your item here like:
+    id_el = scrapy.Field() # id annuncio
+    title = scrapy.Field()
+    link = scrapy.Field()
+    date_scraped = scrapy.Field()
+    price = scrapy.Field()
+    date_published = scrapy.Field()
+    location = scrapy.Field()
+    surface = scrapy.Field()
+    rooms = scrapy.Field()
+    agency = scrapy.Field()
+
+
+class SubitoCategoryLabelsList(scrapy.Item):
+    # define the fields for your item here like:
+    category = scrapy.Field()
+    labels = scrapy.Field()

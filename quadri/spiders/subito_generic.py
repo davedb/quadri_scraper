@@ -1,76 +1,105 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import logging
-from quadri.items import QuadriItem
 
+from scrapy.loader import ItemLoader
+from quadri.items import SubitoSingleItemList
 import datetime as datetime
 
-class ImmobiliareGenericSpider(scrapy.Spider):
+class SubitoSpider(scrapy.Spider):
+    name = "subito_generic"
+    allowed_domains = ["subito.it"]
 
-    name = "immobiliare_generic"
-    allowed_domains = ["immobiliare.it"]
-    #start_urls = ['http://www.immobiliare.it/Milano/vendita_case-Milano.html?criterio=rilevanza']
-
-    # custom settings
-    collection_name_to_save_data = "immobiliare_generic_data"
+    collection_name_to_save_data = "quadrilocale_subito"
 
     current_date = (datetime.datetime.today()).replace(hour=0, minute=0, second=0, microsecond=0)
 
-
     def start_requests(self):
-        try:
-            yield scrapy.Request('http://www.immobiliare.it/%s' % self.url)
-        except AttributeError as e:
-            yield scrapy.Request('http://www.immobiliare.it/%s' % 'ricerca.php?idCategoria=1&idContratto=1&idTipologia=&sottotipologia=&idTipologiaStanza=&idFasciaPrezzo=&idNazione=IT&idRegione=&idProvincia=&idComune=&idLocalita=Array&idAreaGeografica=&prezzoMinimo=&prezzoMassimo=500000&balcone=&balconeOterrazzo=&boxOpostoauto=&stato=&terrazzo=&bagni=&mappa=&foto=&boxAuto=&riscaldamenti=&giardino=&superficie=&superficieMinima=120&superficieMassima=&raggio=&locali=&localiMinimo=&localiMassimo=&criterio=rilevanza&ordine=desc&map=0&tipoProprieta=&arredato=&inAsta=&noAste=&aReddito=&fumatore=&animali=&franchising=&flagNc=&gayfriendly=&internet=&sessoInquilini=&vacanze=&categoriaStanza=&fkTipologiaStanza=&ascensore=&classeEnergetica=&verticaleAste=&pag=1&vrt=45.492673,9.192534000000023;45.49560149695259,9.194957224884092;45.502664773793555,9.200580653488146;45.5018470769309,9.205817843994055;45.49425556202058,9.200370632293698;45.49213975206201,9.204035969619781;45.489803210389525,9.201169408088731;45.491137,9.198732000000064;45.487936009917284,9.195826910034157;45.489379578701346,9.191148166656376;45.492673,9.192534000000023')
-
-    def parse_details_page(self, response):
-        """Parse a details page
-
-        :param response:the response object from spider
-        :rtype: QuadriItem"""
-        # qui siamo nella pagina di dettaglio
-        current_item = None
-        current_item = QuadriItem()
-        current_item['id_el'] = int(response.css('title::text').extract_first().split(' ')[-1])
-        current_item['title'] = response.css('.title-detail::text').extract_first()
-        current_item['link'] = response.url
-        current_item['price'] = response.css('.features__price > span::text').extract_first()
-
-        current_item['desc'] = response.css('#description > div > div::text').extract()
-
-        current_item['other_info'] = {}
-        section_data = response.css('.section-data')
-        for label, data in zip(section_data.css('dl > dt'), section_data.css('dl > dd')):
-            label_extracted = label.css('dt::text').extract_first().lower()
-            # for some label (superficie and tipologia) the data is inside a span tag
-            if data.css('dd::text').extract_first():
-                current_item['other_info'][label_extracted] = data.css('dd::text').extract_first()
-            else:
-                current_item['other_info'][label_extracted] = data.css('dd > span::text').extract_first()
-
-        current_item['agency'] = response.css('.contact-data > .row').css('.h5 > a::text').extract_first()
-        current_item['date_scraped'] = self.current_date
-        return current_item
+        # zone:
+        # 1: Centro storico
+        # 2: Garibaldi/Isola/Centrale
+        # 3: Testi/Monza/Via Padova
+        # 4: Loreto/Abruzzi/Indipendenza
+        # 5: Lambrate/Città Studi
+        # 6: Argonne/Forlanini/Mecenate
+        # 7: Umbria/C.so 22 Marzo
+        # 8: Lodi/Corvetto/Ripamonti
+        # 9: Rogoredo/Chiesa Rossa
+        # 10: Tibaldi/Romolo/Famagosta
+        # 11: P.ta Genova/Solari/Papiniano
+        # 12: Barona/Lorenteggio/L.Moro
+        # 13: Baggio/Forze Armate/B.Nere
+        # 14: Vercelli/Fiera/Sempione
+        # 15: San Siro/Bonola/Trenno
+        # 16: Certosa/Q.Oggiaro/Bovisa
+        # 17: Affori/Ornato/Niguarda
+        ZONE_TO_SEARCH = [2,3,4,5,7,11]
+        urls = [
+            'https://www.subito.it/annunci-lombardia/vendita/appartamenti/milano/milano/?ros=4&sqs=100&pe=700000&search_zone=',
+            ]
+        for url in urls:
+            for zone in ZONE_TO_SEARCH:
+                url_to_scrape = url + str(zone)
+                print(url_to_scrape)
+                yield scrapy.Request(url=url_to_scrape, callback=self.parse)
 
     def parse(self, response):
+        listing = response.css('ul.items_listing > li')
+        #logging.debug('Elementi nel listato: {0}'.format(len(listing), '>20'))
 
-        listing = response.css('#listing-container > li')
-
+        # dentro il listing
         if len(listing) > 0:
-            # qui siamo nella pagina di listing
             for el in listing:
-                detail_page = el.css('.titolo>a::attr(href)').extract_first()
-                if detail_page != None:
-                    # logging.debug('url da analizzare: {0}'.format(detail_page, '>20'))
-                    try:
-                        yield scrapy.Request(detail_page, callback=self.parse)
-                    except ValueError as e:
-                        print(e)
-        else:
-            yield self.parse_details_page(response)
+                current_item = SubitoSingleItemList()
+                current_item['id_el'] = int(el.css('article::attr(data-id)').extract_first())
+                item_desc = el.css('div.item_description')
+                current_item['title'] = item_desc.css('h2>a::attr(title)').extract_first()
+                current_item['link'] = item_desc.css('h2>a::attr(href)').extract_first()
+                current_item['price'] = item_desc.css('span.item_price::text').extract_first()
+                current_item['date_scraped'] = self.current_date
 
+                item_info = item_desc.css('span.item_info')
+                current_item['date_published'] = item_info.css('time::attr(datetime)').extract_first()
+                current_item['location'] = item_info.css('span.item_location').css('em.item_city::text').extract_first()
 
-        next_page = response.css('#listing-pagination > .pull-right > li > a::attr(href)').extract_first()
+                current_item['agency'] = el.css('div.shop_type::text').extract_first().strip() if el.css('div.shop_type::text').extract_first() is not None else 'Privato'
+
+                item_specs = item_desc.css('span.item_specs::text').extract_first()
+                current_item['surface'] = item_specs.strip().split(',')[0].strip()
+                current_item['rooms'] = item_specs.strip().split(',')[1].strip()
+
+                print(current_item)
+                yield current_item
+
+        next_page = response.css('div.pagination_next>a::attr(href)').extract_first()
         if next_page is not None:
             next_page = response.urljoin(next_page)
             yield scrapy.Request(next_page, callback=self.parse)
+
+
+    # def parse_details_page(self, response):
+    #
+    #     for el in listing:
+    #         listing = response.css('ul.items_listing > li')
+    #         logging.debug('Elementi nel listato: {0}'.format(len(listing), '>20'))
+    #
+    #         for el in listing:
+    #             current_item = SubitoSingleItemList()
+    #             current_item['name'] = el.css('article::attr(data-id)').extract_first()
+    #             item_desc = el.css('div.item_description')
+    #             current_item['title'] = item_desc.css('h2>a::attr(title)').extract_first()
+    #             current_item['link'] = item_desc.css('h2>a::attr(href)').extract_first()
+    #             current_item['price'] = item_desc.css('span.item_price::text').extract_first()
+    #             current_item['date_scraped'] = self.current_date
+    #
+    #             item_info = item_desc.css('span.item_info')
+    #             current_item['date_published'] = item_info.css('time::attr(datetime)').extract_first()
+    #             current_item['location'] = item_info.css('span.item_location').css('em.item_city::text').extract_first()
+    #
+    #             current_item['agency'] =
+    #
+    #             item_specs = item_desc.css('span.item_specs::text').extract_first()
+    #             current_item['surface'] = s.strip().split(',')[0].strip()
+    #             current_item['rooms'] = s.strip().split(',')[1].strip()
+    #
+    #             yield current_item

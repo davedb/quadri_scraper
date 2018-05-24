@@ -6,6 +6,15 @@ import datetime as datetime
 
 
 class ImmobiliareTestContentSpider(scrapy.Spider):
+    """
+    Classe Helper.
+    La classe permette di recuperare tutti i valori associati a un attributo definito in
+    ELEMENT_TO_CHECK, all'interno di una pagina dettaglio
+    Vengono stampati all'evento spider close. Tutti gli elementi sono salvati nel set
+    item_seen.
+
+    Utile per capire che tipi di valore aspettarsi da una proprietà.
+    """
     item_seen = set()
     description_pages_scraped = 0
 
@@ -27,7 +36,7 @@ class ImmobiliareTestContentSpider(scrapy.Spider):
     def closed(self, reason):
         print(self.item_seen)
         print('Pagine analizzate: {0}'.format(self.description_pages_scraped))
-        print('Numero di contenuti diversi trovati alla voce Superficie: {0}'.format(len(self.item_seen)))
+        print('Numero di contenuti diversi trovati alla voce {1}: {0}'.format(len(self.item_seen),self.ELEMENT_TO_CHECK))
 
 
     def parse(self, response):

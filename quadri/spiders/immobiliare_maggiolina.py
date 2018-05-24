@@ -3,3 +3,5 @@ from quadri.spiders.immobiliare_generic import ImmobiliareGenericSpider
 class ImmobiliareMaggiolinaSpider(ImmobiliareGenericSpider):
     name = "immobiliare_maggiolina"
     collection_name_to_save_data = 'quadrilocale_area_maggiolina_2017'
+    # il link è incentrato su una mappa definita sul sito.
+    start_urls = ['https://www.immobiliare.it/ricerca.php?idCategoria=1&idContratto=1&idNazione=IT&prezzoMassimo=600000&superficieMinima=100&localiMinimo=4&criterio=rilevanza&ordine=desc&map=0&pag=1&vrt=45.492673,9.192534000000023;45.49560149695259,9.194957224884092;45.502664773793555,9.200580653488146;45.5018470769309,9.205817843994055;45.50013578775924,9.21081304550171;45.49884234624085,9.210662841796877;45.497473672279874,9.213774204254152;45.492058811794514,9.20834541320801;45.49213975206201,9.204035969619781;45.489803210389525,9.201169408088731;45.491137,9.198732000000064;45.48865921668583,9.198775291442873;45.487936009917284,9.195826910034157;45.489379578701346,9.191148166656376']
