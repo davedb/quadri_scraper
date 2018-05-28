@@ -37,6 +37,8 @@ class SubitoSingleItemList(scrapy.Item):
     surface = scrapy.Field()
     rooms = scrapy.Field()
     agency = scrapy.Field()
+    zone_id = scrapy.Field()
+    zone_label = scrapy.Field()
 
 
 class SubitoCategoryLabelsList(scrapy.Item):

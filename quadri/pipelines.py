@@ -89,7 +89,7 @@ class CheckItemValuesPipeline(object):
         return datetime.datetime(date_list[0], date_list[1], date_list[2])
 
 
-    def process_other_info(self, item):
+    def process_other_info_immobiliare(self, item):
         item_other_info = item.get('other_info')
         if item_other_info:
 
@@ -161,7 +161,6 @@ class CheckItemValuesPipeline(object):
         return item
 
     def process_item(self, item, spider):
-
         #check and polish
         if item.get('id_el'):
             pass
@@ -184,7 +183,7 @@ class CheckItemValuesPipeline(object):
             # from '€ 398.000' -> 398000
             price = None
             try:
-                price = int(item.get('price').replace('€ ', '').replace('.', ''))
+                price = int(item.get('price').replace('€', '').replace('.', '').strip())
             except ValueError as e:
                 pass
 
@@ -192,8 +191,28 @@ class CheckItemValuesPipeline(object):
         else:
             raise DropItem("Missing price in {0}".format(item))
 
+        #check and polish surface
+        if item.get('surface'):
+            surface = None
+            try:
+                surface = int(item.get('surface').replace("mq", "").strip())
+            except ValueError as e:
+                pass
 
-        return self.process_other_info( item )
+            item['surface'] = surface
+
+        #check and polish surface
+        if item.get('rooms'):
+            rooms = None
+            try:
+                rooms = int(item.get('rooms').replace("locali", "").strip())
+            except ValueError as e:
+                pass
+
+            item['rooms'] = rooms
+
+
+        return self.process_other_info_immobiliare( item ) if 'immobiliare' in spider.allowed_domains else item
 
 class MongoPipeline(object):
     def __init__(self, mongo_uri, mongo_db, mongo_secret):
