@@ -45,7 +45,7 @@ class ImmobiliareGenericSpider(scrapy.Spider):
         # qui siamo nella pagina di dettaglio
         current_item = None
         current_item = QuadriItem()
-        current_item['id_el'] = int(response.css('title::text').extract_first().split(' ')[-1])
+        # current_item['id_el'] = int(response.css('title::text').extract_first().split(' ')[-1])
         current_item['title'] = response.css('.title-detail::text').extract_first()
         current_item['link'] = response.url
         current_item['price'] = response.css('.features__price > span::text').extract_first()
